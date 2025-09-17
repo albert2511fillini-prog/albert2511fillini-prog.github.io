@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diapason Foundation - AI-Powered Decentralized Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e2e8f0;
+        }
+        .hero-gradient {
+            background: radial-gradient(ellipse at top, rgba(79, 70, 229, 0.25), transparent 60%);
+            position: relative; /* Needed for canvas positioning */
+            overflow: hidden; /* Hide overflowing canvas elements */
+        }
+        .section-gradient {
+            background: radial-gradient(ellipse at center, rgba(30, 41, 59, 0.2), transparent 70%);
+        }
+        /* Enhanced Glow Effect for Buttons and Key Elements */
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 8px rgba(129, 140, 248, 0.4);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .glow-effect:hover {
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.7), 0 0 12px rgba(129, 140, 248, 0.5);
+        }
+        
+        /* Enhanced Card Styles with default shadow and hover effect */
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Text Glow Effect for Headers */
+        .text-glow {
+            text-shadow: 0 0 10px rgba(226, 232, 240, 0.3), 0 0 3px rgba(165, 180, 252, 0.5);
+        }
+
+        /* Dropdown styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1e293b;
+            min-width: 220px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0;
+            border: 1px solid #334155;
+        }
+        .dropdown-content a {
+            color: #e2e8f0;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s ease;
+        }
+        .dropdown-content a:hover {
+            background-color: #334155;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        /* Particle Canvas Style */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Animation Classes */
+        .animate-on-scroll {
+            opacity: 0;
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in {
+            transform: translateY(20px);
+        }
+        .is-visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* --- GLITCH EFFECT STYLES --- */
+        .glitch-base {
+            position: relative;
+        }
+        .glitch-base::before,
+        .glitch-base::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            overflow: hidden;
+            clip-path: inset(50% 50% 50% 50%);
+        }
+        .glitch-base::before {
+            left: -2px;
+            text-shadow: -1px 0 #ff3f80;
+        }
+        .glitch-base::after {
+            left: 2px;
+            text-shadow: -1px 0 #3cffea;
+        }
+        
+        /* 1. Interactive Glitch on Hover */
+        .glitch-hover:hover::before {
+            animation: glitch-anim-1 1s infinite linear alternate-reverse;
+        }
+        .glitch-hover:hover::after {
+            animation: glitch-anim-2 1s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(40% 0 60% 0); } 20% { clip-path: inset(10% 0 85% 0); } 40% { clip-path: inset(55% 0 20% 0); } 60% { clip-path: inset(30% 0 50% 0); } 80% { clip-path: inset(70% 0 10% 0); } 100% { clip-path: inset(45% 0 40% 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(20% 0 75% 0); } 20% { clip-path: inset(80% 0 5% 0); } 40% { clip-path: inset(40% 0 35% 0); } 60% { clip-path: inset(65% 0 15% 0); } 80% { clip-path: inset(25% 0 55% 0); } 100% { clip-path: inset(50% 0 30% 0); }
+        }
+
+        /* 2. Ambient, Continuous Glitch */
+        .glitch-ambient::before {
+             animation: glitch-ambient-1 2.5s infinite linear alternate-reverse;
+        }
+        .glitch-ambient::after {
+             animation: glitch-ambient-2 2.5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-ambient-1 {
+            0% { clip-path: inset(95% 0 2% 0); transform: translate(-0.5px, -1px); }
+            10% { clip-path: inset(5% 0 88% 0); transform: translate(0.5px, 1px); }
+            20% { clip-path: inset(90% 0 3% 0); transform: translate(-0.5px, 0.5px); }
+            30%, 100% { clip-path: inset(50% 50% 50% 50%); transform: translate(0, 0); }
+        }
+        @keyframes glitch-ambient-2 {
+            0% { clip-path: inset(2% 0 95% 0); transform: translate(0.5px, 1px); }
+            10% { clip-path: inset(88% 0 4% 0); transform: translate(-0.5px, -1px); }
+            20% { clip-path: inset(3% 0 90% 0); transform: translate(0.5px, -0.5px); }
+            30%, 100% { clip-path: inset(50% 50% 50% 50%); transform: translate(0, 0); }
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-black/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-800 shadow-lg shadow-black/30">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold text-white">
+                <span class="text-indigo-400">Diapason</span> Foundation
+            </a>
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="text-slate-300 hover:text-indigo-400 transition-colors">Home</a>
+                <a href="#ecosystem" class="text-slate-300 hover:text-indigo-400 transition-colors">Ecosystem</a>
+                <div class="dropdown">
+                    <button class="text-slate-300 hover:text-indigo-400 transition-colors flex items-center">
+                        Projects
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#projects">All Projects</a>
+                        <a href="#project-game-theory">Game Theory</a>
+                        <a href="#project-social">Social Impact Suite</a>
+                        <a href="#project-business">Business Engine</a>
+                    </div>
+                </div>
+                <a href="#roadmap" class="text-slate-300 hover:text-indigo-400 transition-colors">Roadmap</a>
+                <a href="#community" class="text-slate-300 hover:text-indigo-400 transition-colors">Community</a>
+                <a href="#blog" class="text-slate-300 hover:text-indigo-400 transition-colors">Blog</a>
+            </nav>
+            <a href="#community" class="hidden md:block bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2 rounded-lg transition-all duration-300 glow-effect">
+                Join Us
+            </a>
+            <button id="mobile-menu-button" class="md:hidden text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 space-y-2">
+            <a href="#home" class="block text-slate-300 hover:text-indigo-400 transition-colors">Home</a>
+            <a href="#ecosystem" class="block text-slate-300 hover:text-indigo-400 transition-colors">Ecosystem</a>
+            <a href="#projects" class="block text-slate-300 hover:text-indigo-400 transition-colors">Projects</a>
+            <a href="#roadmap" class="block text-slate-300 hover:text-indigo-400 transition-colors">Roadmap</a>
+            <a href="#community" class="block text-slate-300 hover:text-indigo-400 transition-colors">Community</a>
+            <a href="#blog" class="block text-slate-300 hover:text-indigo-400 transition-colors">Blog</a>
+            <a href="#community" class="block bg-indigo-600 hover:bg-indigo-500 text-white font-semibold mt-2 px-5 py-2 rounded-lg transition-colors text-center">
+                Join Us
+            </a>
+        </div>
+    </header>
+
+    <main class="pt-20">
+
+        <!-- Home Section -->
+        <section id="home" class="min-h-screen flex items-center hero-gradient pt-10 pb-20">
+            <canvas id="particle-canvas"></canvas>
+            <div class="container mx-auto px-6 text-center z-10">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-6 text-glow animate-on-scroll fade-in glitch-base glitch-hover" data-text="Building an AI-Powered Decentralized Society for Human Progress.">
+                    Building an <span class="text-indigo-400">AI-Powered Decentralized Society</span> for Human Progress.
+                </h1>
+                <p class="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-10 animate-on-scroll fade-in" style="transition-delay: 150ms;">
+                    Uniting game theory, social impact, and a sustainable economic engine on the foundations of Web3.
+                </p>
+                <a href="#community" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg px-8 py-4 rounded-lg transition-transform transform hover:scale-105 glow-effect animate-on-scroll fade-in" style="transition-delay: 300ms;">
+                    Join Our Community
+                </a>
+                
+                <!-- Pillars Section -->
+                <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div class="bg-slate-900/50 p-8 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in">
+                        <div class="w-16 h-16 mx-auto mb-4 text-indigo-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-network"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Research</h3>
+                        <p class="text-slate-400">A strategic foundation built on game theory to ensure fairness, security, and positive-sum outcomes.</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-8 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 150ms;">
+                        <div class="w-16 h-16 mx-auto mb-4 text-rose-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-handshake"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.82 2.94 0l.96-.96.96.96c.82.82 2.13.82 2.94 0v0a2.17 2.17 0 0 0 0-3.08L12 5Z"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Social Impact</h3>
+                        <p class="text-slate-400">Our core mission to provide free press, mental health support, and accessible education for all.</p>
+                    </div>
+                    <div class="bg-slate-900/50 p-8 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 300ms;">
+                        <div class="w-16 h-16 mx-auto mb-4 text-emerald-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Economic Engine</h3>
+                        <p class="text-slate-400">A self-sustaining economy that rewards contributors and funds our social impact initiatives.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Featured Project (MVP) Section -->
+        <section id="featured-project" class="py-20 bg-black">
+             <div class="container mx-auto px-6 text-center">
+                <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-8 md:p-12 max-w-4xl mx-auto section-gradient card-hover animate-on-scroll fade-in">
+                     <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 text-glow glitch-base glitch-ambient" data-text="First Steps: The AI Workspace">First Steps: The AI Workspace</h2>
+                     <p class="text-slate-400 text-lg mb-8">
+                         Your decentralized toolkit for building the future. Access powerful AI models, collaborate on projects, and build your on-chain reputation. This is the cornerstone of the Diapason ecosystem.
+                     </p>
+                     <a href="#community" class="bg-white hover:bg-slate-200 text-indigo-700 font-bold px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-indigo-500/30">
+                         Get Early Access
+                     </a>
+                </div>
+             </div>
+        </section>
+
+        <!-- Ecosystem Section -->
+        <section id="ecosystem" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 animate-on-scroll fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white text-glow glitch-base glitch-ambient" data-text="A Synergistic Ecosystem">A Synergistic Ecosystem</h2>
+                    <p class="text-lg text-slate-400 mt-4 max-w-2xl mx-auto">Each component is designed to strengthen the others, creating a powerful flywheel for growth and impact.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-8 animate-on-scroll fade-in">
+                        <div>
+                            <h3 class="text-2xl font-bold text-indigo-400 mb-2">The Foundation: Research</h3>
+                            <p class="text-slate-400">Our game theory research isn't just academic; it's the live rulebook for our digital society. It models user behavior to create incentive systems that are fair, exploit-resistant, and encourage long-term, positive contributions.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-indigo-400 mb-2">The Heart: Social Impact</h3>
+                            <p class="text-slate-400">This is our "why". We leverage the privacy and censorship-resistance of Web3 to provide essential services. Profits from our economic engine are funneled back to support these crucial, mission-driven initiatives.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-indigo-400 mb-2">The Engine: Business & Commercialization</h3>
+                            <p class="text-slate-400">A thriving economy is essential for sustainability. By providing real-world utility through our business tools, we generate revenue, create value for our token holders, and provide the fuel that powers our social impact goals.</p>
+                        </div>
+                    </div>
+                    <div class="animate-on-scroll fade-in" style="transition-delay: 150ms;">
+                        <!-- Placeholder for a diagram -->
+                        <div class="w-full h-96 bg-slate-900/50 border border-slate-800 rounded-xl flex items-center justify-center card-hover">
+                            <p class="text-slate-500">Ecosystem Flywheel Diagram</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-20 bg-black/50 section-gradient">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 animate-on-scroll fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white text-glow glitch-base glitch-ambient" data-text="Core Projects">Core Projects</h2>
+                    <p class="text-lg text-slate-400 mt-4 max-w-2xl mx-auto">Explore the pillars of the Diapason ecosystem, from foundational research to our economic drivers.</p>
+                </div>
+                
+                <!-- Project Categories -->
+                <div class="space-y-16">
+                    <!-- Research -->
+                    <div id="project-game-theory">
+                        <h3 class="text-3xl font-bold text-indigo-400 mb-8 border-b-2 border-indigo-400/30 pb-2 animate-on-scroll fade-in flex items-center gap-x-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-network"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+                            <span>Research</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                             <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in">
+                                <h4 class="text-xl font-bold text-white mb-2">The Game Theory</h4>
+                                <p class="text-slate-400">Developing and simulating the tokenomics and governance models that ensure the long-term health and fairness of the ecosystem.</p>
+                             </div>
+                        </div>
+                    </div>
+                    <!-- Social -->
+                    <div id="project-social">
+                        <h3 class="text-3xl font-bold text-rose-400 mb-8 border-b-2 border-rose-400/30 pb-2 animate-on-scroll fade-in flex items-center gap-x-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-handshake"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.82 2.94 0l.96-.96.96.96c.82.82 2.13.82 2.94 0v0a2.17 2.17 0 0 0 0-3.08L12 5Z"/></svg>
+                            <span>Social</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                             <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in">
+                                <h4 class="text-xl font-bold text-white mb-2">Education</h4>
+                                <p class="text-slate-400">An open learning platform with AI-driven personalized paths and verifiable on-chain credentials for your skills.</p>
+                             </div>
+                             <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 150ms;">
+                                <h4 class="text-xl font-bold text-white mb-2">Free Press</h4>
+                                <p class="text-slate-400">A censorship-resistant platform for journalists and creators, powered by decentralized storage and community governance.</p>
+                             </div>
+                             <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 300ms;">
+                                <h4 class="text-xl font-bold text-white mb-2">Mental Health Support</h4>
+                                <p class="text-slate-400">Providing private, anonymous access to AI-powered support tools and a decentralized network of peer supporters.</p>
+                             </div>
+                        </div>
+                    </div>
+                    <!-- Business -->
+                    <div id="project-business">
+                        <h3 class="text-3xl font-bold text-emerald-400 mb-8 border-b-2 border-emerald-400/30 pb-2 animate-on-scroll fade-in flex items-center gap-x-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                            <span>Business</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in"><h4 class="text-xl font-bold text-white mb-2">AI Workspace</h4><p class="text-slate-400">A suite of powerful AI tools for developers, creators, and businesses, accessible through our ecosystem token.</p></div>
+                            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 150ms;"><h4 class="text-xl font-bold text-white mb-2">Community Rewards</h4><p class="text-slate-400">A data-driven system that uses AI to analyze contributions and automatically reward valuable community members.</p></div>
+                            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 300ms;"><h4 class="text-xl font-bold text-white mb-2">Human Resources</h4><p class="text-slate-400">A decentralized talent marketplace where users own their professional identity and AI matches them with opportunities.</p></div>
+                            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in"><h4 class="text-xl font-bold text-white mb-2">NFT Marketplace</h4><p class="text-slate-400">A venue for trading all unique digital assets within the ecosystem, from generative art to educational certificates.</p></div>
+                            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 150ms;"><h4 class="text-xl font-bold text-white mb-2">Best Price Finder</h4><p class="text-slate-400">A DeFi aggregator that uses AI to find the most efficient trading routes across decentralized exchanges, saving users time and money.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap Section -->
+        <section id="roadmap" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 animate-on-scroll fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white text-glow glitch-base glitch-ambient" data-text="Roadmap">Roadmap</h2>
+                    <p class="text-lg text-slate-400 mt-4 max-w-2xl mx-auto">Our journey is ambitious and transparent. Here's our plan to bring the Diapason ecosystem to life.</p>
+                </div>
+                
+                <div class="relative max-w-2xl mx-auto">
+                    <!-- Vertical Line -->
+                    <div class="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-slate-700"></div>
+                    <div class="space-y-16">
+                        <div class="relative animate-on-scroll fade-in"><div class="absolute left-1/2 -translate-x-1/2 top-0 w-4 h-4 bg-indigo-500 rounded-full border-4 border-slate-900 shadow-lg shadow-indigo-500/50"></div><div class="ml-auto md:ml-0 md:w-1/2 md:pr-8 text-left md:text-right"><div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover"><p class="text-indigo-400 font-bold mb-1">Phase 1 (Current)</p><h4 class="text-xl font-bold text-white mb-2">Foundation & Community</h4><ul class="text-slate-400 list-disc list-inside"><li>Website Launch</li><li>Community Channels Open</li><li>AI Workspace (MVP) Development</li></ul></div></div></div>
+                        <div class="relative animate-on-scroll fade-in"><div class="absolute left-1/2 -translate-x-1/2 top-0 w-4 h-4 bg-slate-600 rounded-full border-4 border-slate-900"></div><div class="ml-auto w-full md:w-1/2 md:pl-8"><div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover"><p class="text-slate-500 font-bold mb-1">Phase 2 (Upcoming)</p><h4 class="text-xl font-bold text-white mb-2">Launch & Incentivize</h4><ul class="text-slate-400 list-disc list-inside"><li>AI Workspace Beta Launch</li><li>Community Rewards Program (TGE)</li><li>Education Platform Alpha</li></ul></div></div></div>
+                        <div class="relative animate-on-scroll fade-in"><div class="absolute left-1/2 -translate-x-1/2 top-0 w-4 h-4 bg-slate-600 rounded-full border-4 border-slate-900"></div><div class="ml-auto md:ml-0 md:w-1/2 md:pr-8 text-left md:text-right"><div class="bg-slate-900 p-6 rounded-xl border border-slate-800 card-hover"><p class="text-slate-500 font-bold mb-1">Phase 3 (Future)</p><h4 class="text-xl font-bold text-white mb-2">Scaling the Ecosystem</h4><ul class="text-slate-400 list-disc list-inside"><li>Social Suite Launch</li><li>Decentralized Governance (DAO)</li><li>Full Ecosystem Integration</li></ul></div></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section id="community" class="py-20 bg-indigo-900/20">
+            <div class="container mx-auto px-6 text-center animate-on-scroll fade-in">
+                <h2 class="text-4xl md:text-5xl font-bold text-white text-glow glitch-base glitch-ambient" data-text="Join the Movement">Join the Movement</h2>
+                <p class="text-lg text-slate-400 mt-4 max-w-2xl mx-auto mb-10">Become part of a community dedicated to building a more equitable and intelligent future. Your contribution matters.</p>
+                <div class="flex flex-wrap justify-center gap-4 mb-12">
+                     <a href="#" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-black/40 hover:transform hover:-translate-y-1 flex items-center space-x-2"><svg class="w-6 h-6" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Discord</title><path fill="currentColor" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8852-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4464.8254-.618 1.2292a18.2934 18.2934 0 00-5.4846 0 19.1023 19.1023 0 00-.618-1.2292.0741.0741 0 00-.0785-.0371A19.7913 19.7913 0 003.683 4.3698a.0741.0741 0 00-.0371.0785v.0074s.0074.0148.0148.0222c.5015.4464.9374.9295 1.3283 1.4273a.0741.0741 0 00.0632.0297A15.7073 15.7073 0 0012 5.9612a15.7073 15.7073 0 005.9501.2974.0741.0741 0 00.0632-.0297c.3909-.4978.8268-.9809 1.3283-1.4273.0074-.0074.0148-.0148.0148-.0222v-.0074a.0741.0741 0 00-.0371-.0785zM8.02 15.3312c-1.1825 0-2.152-1.089-2.152-2.4282s.9695-2.4282 2.152-2.4282c1.1973 0 2.1668.977 2.152 2.4282 0 1.3392-.9547 2.4282-2.152 2.4282zm7.96 0c-1.1825 0-2.152-1.089-2.152-2.4282s.9695-2.4282 2.152-2.4282c1.1973 0 2.1668.977 2.152 2.4282 0 1.3392-.9547 2.4282-2.152 2.4282z"/></svg><span>Join Discord</span></a>
+                     <a href="#" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-black/40 hover:transform hover:-translate-y-1 flex items-center space-x-2"><svg class="w-6 h-6" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>X</title><path fill="currentColor" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span>Follow on X</span></a>
+                </div>
+                <div class="max-w-xl mx-auto">
+                    <p class="text-slate-300 mb-4">Subscribe for updates and get early access notifications.</p>
+                    <form class="flex flex-col md:flex-row gap-2">
+                        <input type="email" placeholder="your.email@example.com" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-grow" required>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors glow-effect">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Section -->
+        <section id="blog" class="py-20">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-16 animate-on-scroll fade-in">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white text-glow glitch-base glitch-ambient" data-text="From the Blog">From the Blog</h2>
+                    <p class="text-lg text-slate-400 mt-4 max-w-2xl mx-auto">The latest insights, updates, and thoughts from the Diapason team.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                     <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in"><p class="text-sm text-indigo-400 mb-2">Project Updates</p><h4 class="text-xl font-bold text-white mb-2">Announcing the Diapason Foundation</h4><p class="text-slate-400 mb-4">Our mission, our vision, and why we believe in the power of AI and Web3 to create a better future...</p><a href="#" class="text-indigo-400 hover:text-indigo-300 font-semibold">Read More &rarr;</a></div>
+                     <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 150ms;"><p class="text-sm text-indigo-400 mb-2">AI Insights</p><h4 class="text-xl font-bold text-white mb-2">The Role of Game Theory in AI Governance</h4><p class="text-slate-400 mb-4">How we're using principles from game theory to build fair and robust AI systems...</p><a href="#" class="text-indigo-400 hover:text-indigo-300 font-semibold">Read More &rarr;</a></div>
+                     <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-800 card-hover animate-on-scroll fade-in" style="transition-delay: 300ms;"><p class="text-sm text-indigo-400 mb-2">Web3 Explained</p><h4 class="text-xl font-bold text-white mb-2">Beyond the Hype: Real-World Utility of NFTs</h4><p class="text-slate-400 mb-4">Exploring how non-fungible tokens can represent more than just art, from academic credentials to... </p><a href="#" class="text-indigo-400 hover:text-indigo-300 font-semibold">Read More &rarr;</a></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-slate-800">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                 <p class="text-slate-500">&copy; 2025 Diapason Foundation. All rights reserved.</p>
+                 <div class="flex space-x-6">
+                    <a href="#home" class="text-slate-500 hover:text-indigo-400">Home</a>
+                    <a href="#ecosystem" class="text-slate-500 hover:text-indigo-400">Ecosystem</a>
+                    <a href="#roadmap" class="text-slate-500 hover:text-indigo-400">Roadmap</a>
+                 </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // --- MOBILE MENU ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // --- SMOOTH SCROLL ---
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // --- HIDE HEADER ON SCROLL ---
+        let lastScrollTop = 0;
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                header.style.top = '-100px';
+            } else {
+                header.style.top = '0';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; 
+        }, false);
+
+        // --- SCROLL ANIMATIONS ---
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    scrollObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-on-scroll').forEach((element) => {
+            scrollObserver.observe(element);
+        });
+
+        // --- PARTICLE BACKGROUND ANIMATION ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = document.getElementById('home').offsetHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = 'rgba(129, 140, 248, 0.5)';
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function connectParticles() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                                 + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width/7) * (canvas.height/7)) {
+                        opacityValue = 1 - (distance/20000);
+                        ctx.strokeStyle = `rgba(129, 140, 248, ${opacityValue})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+        
+        window.addEventListener('resize', () => {
+            setCanvasSize();
+            initParticles();
+        });
+
+        // Initial setup
+        setCanvasSize();
+        initParticles();
+        animate();
+    </script>
+</body>
+</html>
+
